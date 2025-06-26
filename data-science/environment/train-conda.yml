@@ -1,9 +1,10 @@
+name: peakOps-ml-environment
 channels:
   - defaults
   - anaconda
   - conda-forge
 dependencies:
-  - python=3.7.5
+  - python=3.7.5 #python=3.12
   - pip
   - pip:
       - azureml-mlflow==1.38.0
@@ -15,3 +16,7 @@ dependencies:
       - matplotlib==3.3.3
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
+
+      # --- Compatibility Fix ---
+      # Pin protobuf to v3.20.x to prevent ImportError with azureml-mlflow
+      # - protobuf==3.20.3
