@@ -1,4 +1,4 @@
-# MLOps Repository Audit Fixes Summary
+# MLOps Repository Audit Fixes Summary 
 
 ## Overview
 This document summarizes all the fixes and improvements made to the VehiclePricingProject repository based on the comprehensive audit findings.
