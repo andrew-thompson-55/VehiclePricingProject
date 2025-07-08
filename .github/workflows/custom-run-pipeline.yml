@@ -55,13 +55,13 @@ jobs:
           echo "🏢 Resource Group: ${{ inputs.resource_group }}"
           echo "🏭 Workspace: ${{ inputs.workspace_name }}"
           
-          # Create the job and capture the run_id
+          # Create the job and capture the run_id, filtering out warnings
           echo "🚀 Creating ML job..."
-          run_id=$(az ml job create --file ${{ github.workspace }}/${{ inputs.parameters-file }} --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query name -o tsv 2>&1)
+          run_id=$(az ml job create --file ${{ github.workspace }}/${{ inputs.parameters-file }} --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query name -o tsv 2>&1 | grep -v "AutoDeleteSettingSchema\|AutoDeleteConditionSchema\|BaseAutoDeleteSettingSchema\|IntellectualPropertySchema\|ProtectionLevelSchema\|BaseIntellectualPropertySchema" | tail -1)
           
-          if [[ -z "$run_id" ]]
+          if [[ -z "$run_id" || "$run_id" == *"Class"* || "$run_id" == *"experimental"* ]]
           then
-            echo "❌ ERROR: Job creation failed"
+            echo "❌ ERROR: Job creation failed or invalid run_id captured"
             echo "DEBUG: Command output: $run_id"
             echo "🔍 Checking workspace connectivity..."
             az ml workspace show --name ${{ inputs.workspace_name }} --resource-group ${{ inputs.resource_group }} || echo "❌ Cannot access workspace"
@@ -74,15 +74,15 @@ jobs:
           
           # Show job details and web link
           echo "🔗 Job details and web link:"
-          az ml job show -n $run_id --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --web 
+          az ml job show -n "$run_id" --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --web 
           
           # Get initial status
-          status=$(az ml job show -n $run_id --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query status -o tsv)
+          status=$(az ml job show -n "$run_id" --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query status -o tsv)
           if [[ -z "$status" ]]
           then
             echo "❌ ERROR: Status query failed"
             echo "🔍 Checking job details..."
-            az ml job show -n $run_id --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }}
+            az ml job show -n "$run_id" --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }}
             exit 1
           fi
           
@@ -96,7 +96,7 @@ jobs:
           while [[ ${running[*]} =~ $status ]]
           do
             sleep 30  # Increased sleep time to reduce API calls
-            status=$(az ml job show -n $run_id --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query status -o tsv)
+            status=$(az ml job show -n "$run_id" --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query status -o tsv)
             echo "📊 Current status: $status"
             
             # Add timeout protection (2 hours)
@@ -115,15 +115,15 @@ jobs:
             
             # Get detailed job information
             echo "📋 Job details:"
-            az ml job show -n $run_id --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }}
+            az ml job show -n "$run_id" --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }}
             
             # Get job logs if available
             echo "📝 Attempting to get job logs..."
-            az ml job download-logs -n $run_id --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --output logs || echo "⚠️ Could not download logs"
+            az ml job download-logs -n "$run_id" --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --output logs || echo "⚠️ Could not download logs"
             
             # Check individual step statuses
             echo "🔍 Checking individual step statuses..."
-            az ml job show -n $run_id --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query "jobs.*.status" -o table || echo "⚠️ Could not get step statuses"
+            az ml job show -n "$run_id" --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query "jobs.*.status" -o table || echo "⚠️ Could not get step statuses"
             
             exit 1
           else
