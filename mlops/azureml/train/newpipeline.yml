@@ -50,7 +50,7 @@ jobs:
       model_output:
         type: mlflow_model
     sampling_algorithm: random  # Specify the sampling algorithm
-    trial: ./train.yml  # Refers to a separate command component
+    trial: ../../../mlops/azureml/train/train.yml  # Fixed path to train.yml
     search_space:
       n_estimators:
         type: choice

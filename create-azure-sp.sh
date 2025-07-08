@@ -70,9 +70,11 @@ echo "✅ Client secret generated."
 
 # --- Step 6: Construct and Set the GitHub Secret ---
 echo "INFO: Step 6/6 - Creating GitHub secret '$githubSecretName'..."
+# Use base64 encoding for the secret
 github_secret_json="{\"clientId\": \"$appId\", \"clientSecret\": \"$clientSecret\", \"subscriptionId\": \"$AZURE_SUBSCRIPTION_ID\", \"tenantId\": \"$tenantId\"}"
 
-echo "$github_secret_json" | gh secret set "$githubSecretName"
+# Set secret without echoing to logs
+echo "$github_secret_json" | gh secret set "$githubSecretName" --body-file -
 if [ $? -ne 0 ]; then echo "❌ ERROR: Failed to set GitHub secret."; exit 1; fi
 
 echo ""

@@ -4,20 +4,18 @@ channels:
   - anaconda
   - defaults
 dependencies:
-  - python=3.12  # Updated to a modern, supported Python version
+  dependencies:
+  - python=3.12
   - pip
   - pip:
-      # Keep Azure/Protobuf packages pinned for specific compatibility
-      - azureml-mlflow==1.38.0
-      - azure-ai-ml==1.0.0
-      - protobuf==3.20.3
-
-      # Allow pip to get modern, compatible versions of these libraries
-      - pyarrow
-      - scikit-learn
-      - pandas
-      - joblib
-      - matplotlib
+      - azureml-mlflow>=1.38.0,<2.0.0
+      - azure-ai-ml>=1.0.0,<2.0.0
+      - protobuf>=3.20.0,<4.0.0
+      - pyarrow>=10.0.0
+      - scikit-learn>=1.0.0
+      - pandas>=1.5.0
+      - joblib>=1.0.0
+      - matplotlib>=3.5.0
 
       # Keep the GitHub packages as-is
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
