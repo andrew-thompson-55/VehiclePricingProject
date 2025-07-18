@@ -18,5 +18,5 @@ variables:
   ado_service_connection_aml_ws: Azure-ARM-Prod
 
   # For pipeline reference
-  resource_group: used_car_resource_group
-  aml_workspace: used_car_project
+  resource_group: Automated_Vehicle_Pricing
+  aml_workspace: Automated_Vehicle_Workspace
